@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Book {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  name        String     @unique
+  authorId    String     @db.ObjectId
+  author      Author     @relation(fields: [authorId], references: [id])
+  mainImg     String
+  description String
+  rating      Float      @default(0)
+  ratingCount Int        @default(0)
+  categoryIds String[]   @db.ObjectId
+  categories  Category[] @relation(fields: [categoryIds], references: [id])
+  orderIds    String[]   @default([]) @db.ObjectId
+  orders      Order[]    @relation(fields: [orderIds], references: [id])
+  totalOrders Int
+}
+
+model Author {
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  name         String  @unique
+  books        Book[]
+  info         String?
+  profileImage String?
+}
+
+model Category {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  name    String   @unique
+  bookIds String[] @default([]) @db.ObjectId
+  books   Book[]   @relation(fields: [bookIds], references: [id])
+}
+
+model User {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  email    String   @unique
+  password String
+  address  String[] @default([])
+  mobile   String?
+  orders   Order[]
+}
+
+model Order {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  status  Boolean  @default(false)
+  bookIds String[] @db.ObjectId
+  books   Book[]   @relation(fields: [bookIds], references: [id])
+  userId  String   @db.ObjectId
+  user    User     @relation(fields: [userId], references: [id])
+}
